@@ -23,6 +23,7 @@
 #include "copyright.h"
 #include "interrupt.h"
 #include "main.h"
+#include "synchconsole.h"
 
 // String definitions for debugging messages
 
@@ -237,6 +238,17 @@ Interrupt::Halt()
     cout << "This is halt\n";
     kernel->stats->Print();
     delete kernel;	// Never returns.
+}
+
+
+void Interrupt::PrintInt(int number){
+    int pow10;
+    for( pow10=1; 10*pow10<=number; pow10*=10 );
+    for( ; number; number%=pow10, pow10/=10 ){
+        kernel->synchConsoleOut->PutChar((number/pow10)+'0');
+    }
+    //kernel->synchConsoleOut->PutChar('\n');
+    return;
 }
 
 int

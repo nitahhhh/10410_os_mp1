@@ -34,6 +34,7 @@
 #define SC_ExecV	13
 #define SC_ThreadExit   14
 #define SC_ThreadJoin   15
+#define SC_PrintInt	16
 #define SC_Add		42
 #define SC_MSG		100
 
