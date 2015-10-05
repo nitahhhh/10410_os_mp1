@@ -23,6 +23,7 @@
 #include "copyright.h"
 #include "interrupt.h"
 #include "main.h"
+#include "synchconsole.h"
 
 // String definitions for debugging messages
 
@@ -236,7 +237,12 @@ Interrupt::Halt()
     cout << "Machine halting!\n\n";
     cout << "This is halt\n";
     kernel->stats->Print();
-    delete kernel;	// Never returns.
+	delete kernel;	// Never returns.
+}
+
+void Interrupt::PrintInt(int number){
+	kernel->synchConsoleOut->PutChar(number+'0');
+	return;
 }
 
 int
