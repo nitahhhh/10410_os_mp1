@@ -71,12 +71,14 @@ ExceptionHandler(ExceptionType which)
 				kernel->synchConsoleOut->PutChar((val/pow10)+'0');
 			}
 			//kernel->synchConsoleOut->PutChar('\n');
-			kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
-			kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
-			kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg)+4);
+			kernel->machine->WriteRegister(PrevPCReg,\
+										kernel->machine->ReadRegister(PCReg));
+			kernel->machine->WriteRegister(PCReg,\
+										kernel->machine->ReadRegister(PCReg)+4);
+			kernel->machine->WriteRegister(NextPCReg,\
+										kernel->machine->ReadRegister(PCReg)+4);
 			return;
 			break;			
-break;
 		case SC_MSG:
 			DEBUG(dbgSys, "Message received.\n");
 			val = kernel->machine->ReadRegister(4);
