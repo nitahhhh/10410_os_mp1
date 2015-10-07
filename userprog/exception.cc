@@ -65,12 +65,8 @@ ExceptionHandler(ExceptionType which)
 			break;
 		case SC_PrintInt:
 			val = kernel->machine->ReadRegister(4);
-			int pow10;
-			for( pow10=1; 10*pow10<=val; pow10*=10 );
-			for( ; val; val%=pow10, pow10/=10 ){
-				kernel->synchConsoleOut->PutChar((val/pow10)+'0');
-			}
-			//kernel->synchConsoleOut->PutChar('\n');
+			kernel->interrupt->PrintInt(val);
+			
 			kernel->machine->WriteRegister(PrevPCReg,\
 										kernel->machine->ReadRegister(PCReg));
 			kernel->machine->WriteRegister(PCReg,\
