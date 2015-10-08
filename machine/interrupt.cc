@@ -237,7 +237,7 @@ Interrupt::Halt()
     cout << "Machine halting!\n\n";
     cout << "This is halt\n";
     kernel->stats->Print();
-	delete kernel;	// Never returns.
+    delete kernel;	// Never returns.
 }
 
 
