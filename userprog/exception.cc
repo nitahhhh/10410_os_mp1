@@ -53,11 +53,32 @@ ExceptionHandler(ExceptionType which)
 {
     int type = kernel->machine->ReadRegister(2);
 	int val;
+	int file_counter = 1;
     int status, exit, threadID, programID;
 	DEBUG(dbgSys, "Received Exception " << which << " type: " << type << "\n");
     switch (which) {
     case SyscallException:
       	switch(type) {
+      	case SC_Open:
+      		char *filename;
+			OpenFile* file_open_ptr, file_table[5];
+      		
+			val = kernel->machine->ReadRegister(4);
+			filename = &(kernel->machine->mainMemory[val]);
+			file_open_ptr = kernel->fileSystem->Open(filename);
+			cout << "file_open_ptr = " << file_open_ptr << endl; 
+			
+			file_table[file_counter++] = file_open_ptr;
+			cout << "file_table[" << file_counter-1 << "] = " << file_table[1] << endl;
+			
+			kernel->machine->WriteRegister(PrevPCReg,\
+										kernel->machine->ReadRegister(PCReg));
+			kernel->machine->WriteRegister(PCReg,\
+										kernel->machine->ReadRegister(PCReg)+4);
+			kernel->machine->WriteRegister(NextPCReg,\
+										kernel->machine->ReadRegister(PCReg)+4);
+      		return;
+      		break;
       	case SC_Halt:
 			DEBUG(dbgSys, "Shutdown, initiated by user program.\n");
 			SysHalt();
