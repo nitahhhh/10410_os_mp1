@@ -233,7 +233,6 @@ FileSystem::Open(char *name)
     DEBUG(dbgFile, "Opening file" << name);
     directory->FetchFrom(directoryFile);
     sector = directory->Find(name); 
-    cout << "sector = " << sector << endl;
     if (sector >= 0) 		
 	openFile = new OpenFile(sector);	// name was found in directory 
     delete directory;
