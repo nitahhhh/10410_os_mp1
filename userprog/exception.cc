@@ -53,7 +53,9 @@ ExceptionHandler(ExceptionType which)
 {
     int type = kernel->machine->ReadRegister(2);
 	int val;
+	int file_counter = 1;
     int status, exit, threadID, programID;
+    static OpenFile* file_list[5];
 	DEBUG(dbgSys, "Received Exception " << which << " type: " << type << "\n");
     switch (which) {
     case SyscallException:
@@ -65,7 +67,44 @@ ExceptionHandler(ExceptionType which)
 			val = kernel->machine->ReadRegister(4);
 			filename = &(kernel->machine->mainMemory[val]);
 			file_open_ptr = kernel->fileSystem->Open(filename);
-			cout << "file_open_ptr = " << file_open_ptr << endl;
+			file_list[1] = file_open_ptr;
+
+			kernel->machine->WriteRegister(PrevPCReg,\
+										kernel->machine->ReadRegister(PCReg));
+			kernel->machine->WriteRegister(PCReg,\
+										kernel->machine->ReadRegister(PCReg)+4);
+			kernel->machine->WriteRegister(NextPCReg,\
+										kernel->machine->ReadRegister(PCReg)+4);
+			//cout << "Reg[31] = " << kernel->machine->ReadRegister(31) << endl;
+			cout << "file_ptr = " << file_list[file_counter] << endl;
+			kernel->machine->WriteRegister(2, file_counter);
+			//cout << "Reg[31] = " << kernel->machine->ReadRegister(31) << endl;
+			//kernel->machine->WriteRegister(31, file_counter);
+      		return;
+      		break;
+      	case SC_Write:
+      		
+      		int file_write_num, file_write_str, file_ret;
+			char *write_into;
+			file_counter = kernel->machine->ReadRegister(6);
+			file_write_str = kernel->machine->ReadRegister(4);
+			file_write_num = kernel->machine->ReadRegister(5);
+			write_into = &(kernel->machine->mainMemory[file_write_str]);
+			file_ret = file_list[file_counter]->Write(write_into,file_write_num);
+
+			kernel->machine->WriteRegister(2, file_ret);
+			kernel->machine->WriteRegister(PrevPCReg,\
+										kernel->machine->ReadRegister(PCReg));
+			kernel->machine->WriteRegister(PCReg,\
+										kernel->machine->ReadRegister(PCReg)+4);
+			kernel->machine->WriteRegister(NextPCReg,\
+										kernel->machine->ReadRegister(PCReg)+4);
+			return;
+      		break;
+		case SC_Remove:
+      		
+      		file_counter = kernel->machine->ReadRegister(4);
+			delete file_list[file_counter];
 			
 			kernel->machine->WriteRegister(PrevPCReg,\
 										kernel->machine->ReadRegister(PCReg));
