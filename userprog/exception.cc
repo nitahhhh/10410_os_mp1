@@ -48,6 +48,7 @@
 //	is in machine.h.
 //----------------------------------------------------------------------
 
+#define FILE_MAX 5
 void
 ExceptionHandler(ExceptionType which)
 {
@@ -60,8 +61,8 @@ ExceptionHandler(ExceptionType which)
 	OpenFile* file_open_ptr;
     
     // File pointer table
-    static char file_list_name[5][30];
-    static OpenFile* file_list[5];
+    static char file_list_name[FILE_MAX][30];
+    static OpenFile* file_list[FILE_MAX];
 	DEBUG(dbgSys, "Received Exception " << which << " type: " << type << "\n");
     switch (which) {
     case SyscallException:
@@ -76,13 +77,14 @@ ExceptionHandler(ExceptionType which)
 			file_list[file_counter] = file_open_ptr;	// Set openfile array
 			strcpy(file_list_name[1], filename);		// Set filename array
 
-			kernel->machine->WriteRegister(2, file_counter++);
+			kernel->machine->WriteRegister(2, file_counter);
 			kernel->machine->WriteRegister(PrevPCReg,\
 										kernel->machine->ReadRegister(PCReg));
 			kernel->machine->WriteRegister(PCReg,\
 										kernel->machine->ReadRegister(PCReg)+4);
 			kernel->machine->WriteRegister(NextPCReg,\
 										kernel->machine->ReadRegister(PCReg)+4);
+			file_counter = (file_counter+1) % FILE_MAX;
       		return;
       		break;
       	case SC_Write:
