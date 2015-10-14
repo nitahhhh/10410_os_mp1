@@ -64,11 +64,11 @@ Machine::Run()
     }
     kernel->interrupt->setStatus(UserMode);
     for (;;) {
-    	OneInstruction(instr);
+        OneInstruction(instr);
 		kernel->interrupt->OneTick();
 		if (singleStep && (runUntilTime <= kernel->stats->totalTicks))
-			Debugger();
-  	}
+	  		Debugger();
+    }
 }
 
 
@@ -258,7 +258,7 @@ Machine::OneInstruction(Instruction *instr)
 	registers[instr->rd] = registers[NextPCReg] + 4;
       case OP_JR:
 	pcAfter = registers[instr->rs];
-    break;
+	break;
 	
       case OP_LB:
       case OP_LBU:
@@ -275,10 +275,10 @@ Machine::OneInstruction(Instruction *instr)
 	break;
 	
       case OP_LH:
-      case OP_LHU:
+      case OP_LHU:	  
 	tmp = registers[instr->rs] + instr->extra;
 	if (tmp & 0x1) {
-		RaiseException(AddressErrorException, tmp);
+	    RaiseException(AddressErrorException, tmp);
 	    return;
 	}
 	if (!ReadMem(tmp, 2, &value))
@@ -298,9 +298,9 @@ Machine::OneInstruction(Instruction *instr)
 	break;
 	
       case OP_LW:
-    tmp = registers[instr->rs] + instr->extra;
+	tmp = registers[instr->rs] + instr->extra;
 	if (tmp & 0x3) {
-		RaiseException(AddressErrorException, tmp);
+	    RaiseException(AddressErrorException, tmp);
 	    return;
 	}
 	if (!ReadMem(tmp, 4, &value))
@@ -574,7 +574,7 @@ Machine::OneInstruction(Instruction *instr)
 	if (!ReadMem((tmp & ~0x3), 4, &value))
 	    return;
 #endif
-    
+
 #ifdef SIM_FIX
 	switch( 3 - byte )
 #else
@@ -668,7 +668,7 @@ Machine::OneInstruction(Instruction *instr)
 	break;
     	
       case OP_SYSCALL:
-      RaiseException(SyscallException, 0);
+	RaiseException(SyscallException, 0);
 	return; 
 	
       case OP_XOR:
@@ -687,7 +687,7 @@ Machine::OneInstruction(Instruction *instr)
       default:
 	ASSERT(FALSE);
     }
-    	
+    
     // Now we have successfully executed the instruction.
     
     // Do any delayed load operation
@@ -698,7 +698,6 @@ Machine::OneInstruction(Instruction *instr)
 						// are jumping into lala-land
     registers[PCReg] = registers[NextPCReg];
     registers[NextPCReg] = pcAfter;
-    
 }
 
 //----------------------------------------------------------------------
