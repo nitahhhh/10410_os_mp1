@@ -68,7 +68,6 @@ ExceptionHandler(ExceptionType which)
       	switch(type) {
       	case SC_Open:
 			      		
-			printf("SC_open start\n");
 			// load $r4
 			val = kernel->machine->ReadRegister(4);
 
@@ -84,7 +83,6 @@ ExceptionHandler(ExceptionType which)
 										kernel->machine->ReadRegister(PCReg)+4);
 			kernel->machine->WriteRegister(NextPCReg,\
 										kernel->machine->ReadRegister(PCReg)+4);
-			printf("SC_open complete\n");
       		return;
       		break;
       	case SC_Write:
@@ -110,7 +108,6 @@ ExceptionHandler(ExceptionType which)
 
   		case SC_Read:
       		
-      		cout<< "SC_Read..." << endl;
       		// load argument
 			file_write_ptr = kernel->machine->ReadRegister(4);
 			file_write_num = kernel->machine->ReadRegister(5);
@@ -119,7 +116,6 @@ ExceptionHandler(ExceptionType which)
 			file_write_str = &(kernel->machine->mainMemory[file_write_ptr]);
 			file_write_ret = \
 					file_list[file_pos]->Read(file_write_str,file_write_num);
-			cout << "ret = " << file_write_ret;
 
 			kernel->machine->WriteRegister(2, file_write_ret);
 			kernel->machine->WriteRegister(PrevPCReg,\
