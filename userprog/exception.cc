@@ -52,12 +52,95 @@ void
 ExceptionHandler(ExceptionType which)
 {
     int type = kernel->machine->ReadRegister(2);
-	int val;
-    int status, exit, threadID, programID;
+	int file_counter = 1;
+    int val, status;
+	int file_pos; // The position of OpenFile* in file_list array
+	int file_write_num, file_write_ptr, file_write_ret;
+	char *file_write_str, *filename;
+	OpenFile* file_open_ptr;
+    
+    // File pointer table
+    static char file_list_name[5][30];
+    static OpenFile* file_list[5];
 	DEBUG(dbgSys, "Received Exception " << which << " type: " << type << "\n");
     switch (which) {
     case SyscallException:
       	switch(type) {
+      	case SC_Open:
+			      		
+			// load $r4
+			val = kernel->machine->ReadRegister(4);
+
+			filename = &(kernel->machine->mainMemory[val]);
+			file_open_ptr = kernel->fileSystem->Open(filename);	// Set openfile*
+			file_list[file_counter] = file_open_ptr;	// Set openfile array
+			strcpy(file_list_name[1], filename);		// Set filename array
+
+			kernel->machine->WriteRegister(2, file_counter++);
+			kernel->machine->WriteRegister(PrevPCReg,\
+										kernel->machine->ReadRegister(PCReg));
+			kernel->machine->WriteRegister(PCReg,\
+										kernel->machine->ReadRegister(PCReg)+4);
+			kernel->machine->WriteRegister(NextPCReg,\
+										kernel->machine->ReadRegister(PCReg)+4);
+      		return;
+      		break;
+      	case SC_Write:
+      		
+      		// load argument
+			file_write_ptr = kernel->machine->ReadRegister(4);
+			file_write_num = kernel->machine->ReadRegister(5);
+      		file_pos = 		 kernel->machine->ReadRegister(6);
+
+			file_write_str = &(kernel->machine->mainMemory[file_write_ptr]);
+			file_write_ret = \
+					file_list[file_pos]->Write(file_write_str,file_write_num);
+
+			kernel->machine->WriteRegister(2, file_write_ret);
+			kernel->machine->WriteRegister(PrevPCReg,\
+										kernel->machine->ReadRegister(PCReg));
+			kernel->machine->WriteRegister(PCReg,\
+										kernel->machine->ReadRegister(PCReg)+4);
+			kernel->machine->WriteRegister(NextPCReg,\
+										kernel->machine->ReadRegister(PCReg)+4);
+			return;
+      		break;
+
+  		case SC_Read:
+      		
+      		// load argument
+			file_write_ptr = kernel->machine->ReadRegister(4);
+			file_write_num = kernel->machine->ReadRegister(5);
+      		file_pos = 		 kernel->machine->ReadRegister(6);
+
+			file_write_str = &(kernel->machine->mainMemory[file_write_ptr]);
+			file_write_ret = \
+					file_list[file_pos]->Read(file_write_str,file_write_num);
+
+			kernel->machine->WriteRegister(2, file_write_ret);
+			kernel->machine->WriteRegister(PrevPCReg,\
+										kernel->machine->ReadRegister(PCReg));
+			kernel->machine->WriteRegister(PCReg,\
+										kernel->machine->ReadRegister(PCReg)+4);
+			kernel->machine->WriteRegister(NextPCReg,\
+										kernel->machine->ReadRegister(PCReg)+4);
+			return;
+      		break;
+
+  		case SC_Close:	
+			file_pos = kernel->machine->ReadRegister(4);
+			delete file_list[file_pos];
+
+			kernel->machine->WriteRegister(2, 1);
+			kernel->machine->WriteRegister(PrevPCReg,\
+										kernel->machine->ReadRegister(PCReg));
+			kernel->machine->WriteRegister(PCReg,\
+										kernel->machine->ReadRegister(PCReg)+4);
+			kernel->machine->WriteRegister(NextPCReg,\
+										kernel->machine->ReadRegister(PCReg)+4);
+			return;
+			break;
+
       	case SC_Halt:
 			DEBUG(dbgSys, "Shutdown, initiated by user program.\n");
 			SysHalt();
