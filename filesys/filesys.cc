@@ -237,6 +237,7 @@ FileSystem::Open(char *name)
 	openFile = new OpenFile(sector);	// name was found in directory 
     delete directory;
     return openFile;				// return NULL if not found
+
 }
 
 //----------------------------------------------------------------------

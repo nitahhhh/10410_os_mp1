@@ -33,6 +33,23 @@ int SysCreate(char *filename)
 	// 0: failed
 	return kernel->interrupt->CreateFile(filename);
 }
+void SysPrintInt(int val){
+	kernel->interrupt->PrintInt(val);
+}
 
+OpenFile* SysOpen(char* filename){
+	return kernel->Open_File(filename);			
+}
+
+int SysWrite(char *buffer, int size, OpenFile* openfile){
+	return kernel->WriteFile(buffer,size,openfile);	
+
+}
+int SysRead(char *buffer, int size, OpenFile* openfile){
+	return kernel->ReadFile(buffer,size,openfile);
+}
+int SysClose(OpenFile* openfile){
+	return kernel->CloseFile(openfile);
+}
 
 #endif /* ! __USERPROG_KSYSCALL_H__ */

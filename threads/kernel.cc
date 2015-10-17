@@ -307,5 +307,19 @@ int Kernel::CreateFile(char *filename)
 {
 	return fileSystem->Create(filename);
 }
+OpenFile* Kernel::Open_File(char* filename){
+	return fileSystem->Open(filename); 
+} 
+int Kernel::WriteFile(char *buffer,int size, OpenFile* openfile){
+                return openfile->Write(buffer,size);
+}
 
+int Kernel::ReadFile(char *buffer,int size, OpenFile* openfile){
+                return openfile->Read(buffer,size);
+}
+int Kernel::CloseFile(OpenFile* openfile){
+	 openfile=NULL;
 
+        if(openfile==NULL) return 1;
+        else return 0;
+}

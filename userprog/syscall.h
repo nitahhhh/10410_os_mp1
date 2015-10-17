@@ -178,6 +178,10 @@ int ThreadJoin(ThreadId id);
  */
 void ThreadExit(int ExitCode);	
 
+
+
+
+
 #endif /* IN_ASM */
 
 #endif /* SYSCALL_H */

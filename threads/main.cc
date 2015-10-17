@@ -76,6 +76,7 @@ static const int TransferSize = 128;
 // Copy
 //      Copy the contents of the UNIX file "from" to the Nachos file "to"
 //----------------------------------------------------------------------
+//typedef int OpenFileId; 
 
 static void
 Copy(char *from, char *to)
@@ -128,7 +129,8 @@ Copy(char *from, char *to)
 void
 Print(char *name)
 {
-    OpenFile *openFile;    
+    OpenFile *openFile;
+	    
     int i, amountRead;
     char *buffer;
 

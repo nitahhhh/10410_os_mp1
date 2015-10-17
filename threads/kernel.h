@@ -24,10 +24,9 @@ class PostOfficeOutput;
 class SynchConsoleInput;
 class SynchConsoleOutput;
 class SynchDisk;
+ 
 
-
-
-class Kernel {
+class Kernel{
   public:
     Kernel(int argc, char **argv);
     				// Interpret command line arguments
@@ -44,8 +43,13 @@ class Kernel {
     void NetworkTest();         // interactive 2-machine network test
 	Thread* getThread(int threadID){return t[threadID];}    
 	
-	int CreateFile(char* filename); // fileSystem call
+	int CreateFile(char* filename); 
+	int WriteFile(char *buffer,int size, OpenFile* openfile);
+	OpenFile* Open_File(char* filename);
+	int CloseFile(OpenFile* openfile);
 
+	
+	int ReadFile(char *buffer,int size, OpenFile* openfile);
 // These are public for notational convenience; really, 
 // they're global variables used everywhere.
 
@@ -59,6 +63,7 @@ class Kernel {
     SynchConsoleOutput *synchConsoleOut;
     SynchDisk *synchDisk;
     FileSystem *fileSystem;     
+    //OpenFile *openFile;
     PostOfficeInput *postOfficeIn;
     PostOfficeOutput *postOfficeOut;
 

@@ -48,7 +48,6 @@
 //	is in machine.h.
 //----------------------------------------------------------------------
 
-#define FILE_MAX 5
 void
 ExceptionHandler(ExceptionType which)
 {
@@ -58,88 +57,71 @@ ExceptionHandler(ExceptionType which)
 	int file_pos; // The position of OpenFile* in file_list array
 	int file_write_num, file_write_ptr, file_write_ret;
 	char *file_write_str, *filename;
-	OpenFile* file_open_ptr;
-    
+	OpenFile *file_open_ptr,*openfile_ptr;
+ 	   
     // File pointer table
-    static char file_list_name[FILE_MAX][30];
-    static OpenFile* file_list[FILE_MAX];
+    static char file_list_name[5][30];	//openfile name table
+    static OpenFile* file_list[5];	//openfile ID table
 	DEBUG(dbgSys, "Received Exception " << which << " type: " << type << "\n");
     switch (which) {
     case SyscallException:
       	switch(type) {
       	case SC_Open:
-			      		
-			// load $r4
-			val = kernel->machine->ReadRegister(4);
-
-			filename = &(kernel->machine->mainMemory[val]);
-			file_open_ptr = kernel->fileSystem->Open(filename);	// Set openfile*
+			  
+			val = kernel->machine->ReadRegister(4); //load $r4
+			filename = &(kernel->machine->mainMemory[val]);	
+		
+			file_open_ptr = SysOpen( filename);	//syscall			
 			file_list[file_counter] = file_open_ptr;	// Set openfile array
 			strcpy(file_list_name[1], filename);		// Set filename array
 
-			kernel->machine->WriteRegister(2, file_counter);
-			kernel->machine->WriteRegister(PrevPCReg,\
-										kernel->machine->ReadRegister(PCReg));
-			kernel->machine->WriteRegister(PCReg,\
-										kernel->machine->ReadRegister(PCReg)+4);
-			kernel->machine->WriteRegister(NextPCReg,\
-										kernel->machine->ReadRegister(PCReg)+4);
-			file_counter = (file_counter+1) % FILE_MAX;
+			kernel->machine->WriteRegister(2, file_counter++);
+			kernel->machine->WriteRegister(PrevPCReg,kernel->machine->ReadRegister(PCReg));
+			kernel->machine->WriteRegister(PCReg,kernel->machine->ReadRegister(PCReg)+4);
+			kernel->machine->WriteRegister(NextPCReg,kernel->machine->ReadRegister(PCReg)+4);
       		return;
       		break;
-      	case SC_Write:
-      		
+      		case SC_Write:
       		// load argument
 			file_write_ptr = kernel->machine->ReadRegister(4);
 			file_write_num = kernel->machine->ReadRegister(5);
-      		file_pos = 		 kernel->machine->ReadRegister(6);
-
-			file_write_str = &(kernel->machine->mainMemory[file_write_ptr]);
-			file_write_ret = \
-					file_list[file_pos]->Write(file_write_str,file_write_num);
-
+      			file_pos = 	 kernel->machine->ReadRegister(6);
+			file_write_str = &(kernel->machine->mainMemory[file_write_ptr]); //cvt int arg to char*
+		
+			openfile_ptr = file_list[file_pos]; //find file object from table  
+			file_write_ret = SysWrite( file_write_str, file_write_num, openfile_ptr); //syscall
 			kernel->machine->WriteRegister(2, file_write_ret);
-			kernel->machine->WriteRegister(PrevPCReg,\
-										kernel->machine->ReadRegister(PCReg));
-			kernel->machine->WriteRegister(PCReg,\
-										kernel->machine->ReadRegister(PCReg)+4);
-			kernel->machine->WriteRegister(NextPCReg,\
-										kernel->machine->ReadRegister(PCReg)+4);
+			kernel->machine->WriteRegister(PrevPCReg,kernel->machine->ReadRegister(PCReg));
+			kernel->machine->WriteRegister(PCReg,kernel->machine->ReadRegister(PCReg)+4);
+			kernel->machine->WriteRegister(NextPCReg,kernel->machine->ReadRegister(PCReg)+4);
 			return;
       		break;
-
   		case SC_Read:
-      		
       		// load argument
 			file_write_ptr = kernel->machine->ReadRegister(4);
 			file_write_num = kernel->machine->ReadRegister(5);
-      		file_pos = 		 kernel->machine->ReadRegister(6);
-
-			file_write_str = &(kernel->machine->mainMemory[file_write_ptr]);
-			file_write_ret = \
-					file_list[file_pos]->Read(file_write_str,file_write_num);
-
+      			file_pos =  kernel->machine->ReadRegister(6);
+			file_write_str = &(kernel->machine->mainMemory[file_write_ptr]); //cvt int arg to char*
+			
+			openfile_ptr=file_list[file_pos]; //find file object from table
+			file_write_ret = SysRead(file_write_str, file_write_num, openfile_ptr); //syscall
 			kernel->machine->WriteRegister(2, file_write_ret);
-			kernel->machine->WriteRegister(PrevPCReg,\
-										kernel->machine->ReadRegister(PCReg));
-			kernel->machine->WriteRegister(PCReg,\
-										kernel->machine->ReadRegister(PCReg)+4);
-			kernel->machine->WriteRegister(NextPCReg,\
-										kernel->machine->ReadRegister(PCReg)+4);
+			kernel->machine->WriteRegister(PrevPCReg,kernel->machine->ReadRegister(PCReg));
+			kernel->machine->WriteRegister(PCReg,kernel->machine->ReadRegister(PCReg)+4);
+			kernel->machine->WriteRegister(NextPCReg,kernel->machine->ReadRegister(PCReg)+4);
 			return;
       		break;
 
   		case SC_Close:	
 			file_pos = kernel->machine->ReadRegister(4);
-			delete file_list[file_pos];
+			delete file_list[file_pos];	//remove object from table
+			
+			status = SysClose(file_list[file_pos]);//syscall
 
-			kernel->machine->WriteRegister(2, 1);
-			kernel->machine->WriteRegister(PrevPCReg,\
-										kernel->machine->ReadRegister(PCReg));
-			kernel->machine->WriteRegister(PCReg,\
-										kernel->machine->ReadRegister(PCReg)+4);
-			kernel->machine->WriteRegister(NextPCReg,\
-										kernel->machine->ReadRegister(PCReg)+4);
+			kernel->machine->WriteRegister(2, status);
+			kernel->machine->WriteRegister(PrevPCReg,kernel->machine->ReadRegister(PCReg));
+			kernel->machine->WriteRegister(PCReg,kernel->machine->ReadRegister(PCReg)+4);
+			kernel->machine->WriteRegister(NextPCReg,kernel->machine->ReadRegister(PCReg)+4);
 			return;
 			break;
 
@@ -150,8 +132,8 @@ ExceptionHandler(ExceptionType which)
 			break;
 		case SC_PrintInt:
 			val = kernel->machine->ReadRegister(4);
-			kernel->interrupt->PrintInt(val);
-			
+			//kernel->interrupt->PrintInt(val);
+			SysPrintInt(val);
 			kernel->machine->WriteRegister(PrevPCReg,\
 										kernel->machine->ReadRegister(PCReg));
 			kernel->machine->WriteRegister(PCReg,\

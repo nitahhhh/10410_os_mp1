@@ -104,7 +104,7 @@ Machine::RaiseException(ExceptionType which, int badVAddr)
     registers[BadVAddrReg] = badVAddr;
     DelayedLoad(0, 0);			// finish anything in progress
     kernel->interrupt->setStatus(SystemMode);
-    ExceptionHandler(which);		// interrupts are enabled at this point
+	ExceptionHandler(which);		// interrupts are enabled at this point
     kernel->interrupt->setStatus(UserMode);
 }
 
