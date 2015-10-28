@@ -25,6 +25,7 @@
 #include "main.h"
 #include "synchconsole.h"
 
+
 // String definitions for debugging messages
 
 static char *intLevelNames[] = { "off", "on"};
@@ -151,28 +152,29 @@ Interrupt::OneTick()
     MachineStatus oldStatus = status;
     Statistics *stats = kernel->stats;
 
-// advance simulated time
-    if (status == SystemMode) {
+    // advance simulated time
+    if(status == SystemMode){
         stats->totalTicks += SystemTick;
-	stats->systemTicks += SystemTick;
-    } else {
-	stats->totalTicks += UserTick;
-	stats->userTicks += UserTick;
+        stats->systemTicks += SystemTick;
+    }
+    else{
+        stats->totalTicks += UserTick;
+        stats->userTicks += UserTick;
     }
     DEBUG(dbgInt, "== Tick " << stats->totalTicks << " ==");
 
-// check any pending interrupts are now ready to fire
+    // check any pending interrupts are now ready to fire
     ChangeLevel(IntOn, IntOff);	// first, turn off interrupts
-				// (interrupt handlers run with
-				// interrupts disabled)
+                				// (interrupt handlers run with
+                				// interrupts disabled)
     CheckIfDue(FALSE);		// check for pending interrupts
     ChangeLevel(IntOff, IntOn);	// re-enable interrupts
-    if (yieldOnReturn) {	// if the timer device handler asked 
-    				// for a context switch, ok to do it now
-	yieldOnReturn = FALSE;
- 	status = SystemMode;		// yield is a kernel routine
-	kernel->currentThread->Yield();
-	status = oldStatus;
+    if(yieldOnReturn){	// if the timer device handler asked 
+    				        // for a context switch, ok to do it now
+        yieldOnReturn = FALSE;
+        status = SystemMode;		// yield is a kernel routine
+        kernel->currentThread->Yield();
+        status = oldStatus;
     }
 }
 

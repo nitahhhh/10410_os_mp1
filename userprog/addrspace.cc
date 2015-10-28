@@ -31,16 +31,14 @@
 static void 
 SwapHeader (NoffHeader *noffH)
 {
-    noffH->noffMagic = WordToHost(noffH->noffMagic);
-    noffH->code.size = WordToHost(noffH->code.size);
+    noffH->noffMagic        = WordToHost(noffH->noffMagic);
+    noffH->code.size        = WordToHost(noffH->code.size);
     noffH->code.virtualAddr = WordToHost(noffH->code.virtualAddr);
-    noffH->code.inFileAddr = WordToHost(noffH->code.inFileAddr);
+    noffH->code.inFileAddr  = WordToHost(noffH->code.inFileAddr);
 #ifdef RDATA
     noffH->readonlyData.size = WordToHost(noffH->readonlyData.size);
-    noffH->readonlyData.virtualAddr = 
-           WordToHost(noffH->readonlyData.virtualAddr);
-    noffH->readonlyData.inFileAddr = 
-           WordToHost(noffH->readonlyData.inFileAddr);
+    noffH->readonlyData.virtualAddr = WordToHost(noffH->readonlyData.virtualAddr);
+    noffH->readonlyData.inFileAddr  = WordToHost(noffH->readonlyData.inFileAddr);
 #endif 
     noffH->initData.size = WordToHost(noffH->initData.size);
     noffH->initData.virtualAddr = WordToHost(noffH->initData.virtualAddr);
@@ -109,67 +107,63 @@ AddrSpace::Load(char *fileName)
     NoffHeader noffH;
     unsigned int size;
 
+    // Error handler
     if (executable == NULL) {
-	cerr << "Unable to open file " << fileName << "\n";
-	return FALSE;
+    	cerr << "Unable to open file " << fileName << "\n";
+    	return FALSE;
     }
 
     executable->ReadAt((char *)&noffH, sizeof(noffH), 0);
-    if ((noffH.noffMagic != NOFFMAGIC) && 
-		(WordToHost(noffH.noffMagic) == NOFFMAGIC))
-    	SwapHeader(&noffH);
+    if ((noffH.noffMagic != NOFFMAGIC) && (WordToHost(noffH.noffMagic) == NOFFMAGIC)){
+        SwapHeader(&noffH); // SwapHeader do endian translation
+    }
     ASSERT(noffH.noffMagic == NOFFMAGIC);
 
-#ifdef RDATA
-// how big is address space?
+    #ifdef RDATA    // how big is address space?
     size = noffH.code.size + noffH.readonlyData.size + noffH.initData.size +
            noffH.uninitData.size + UserStackSize;	
                                                 // we need to increase the size
-						// to leave room for the stack
-#else
-// how big is address space?
-    size = noffH.code.size + noffH.initData.size + noffH.uninitData.size 
-			+ UserStackSize;	// we need to increase the size
-						// to leave room for the stack
-#endif
-    numPages = divRoundUp(size, PageSize);
+                                                // to leave room for the stack
+    #else           // how big is address space?
+    size = noffH.code.size + noffH.initData.size + noffH.uninitData.size + UserStackSize;
+                                                // we need to increase the size
+                                                // to leave room for the stack
+    #endif
+
+    numPages = divRoundUp(size, PageSize);  // numPages = ceiling(size/PageSize)
     size = numPages * PageSize;
-
-    ASSERT(numPages <= NumPhysPages);		// check we're not trying
-						// to run anything too big --
-						// at least until we have
-						// virtual memory
-
+    ASSERT(numPages <= NumPhysPages);   // check we're not trying to run too big --
+                                        // at least until we have virtual memory
     DEBUG(dbgAddr, "Initializing address space: " << numPages << ", " << size);
 
-// then, copy in the code and data segments into memory
-// Note: this code assumes that virtual address = physical address
+    // then, copy in the code and data segments into memory
+    // Note: this code assumes that virtual address = physical address
     if (noffH.code.size > 0) {
         DEBUG(dbgAddr, "Initializing code segment.");
-	DEBUG(dbgAddr, noffH.code.virtualAddr << ", " << noffH.code.size);
+        DEBUG(dbgAddr, noffH.code.virtualAddr << ", " << noffH.code.size);
         executable->ReadAt(
-		&(kernel->machine->mainMemory[noffH.code.virtualAddr]), 
-			noffH.code.size, noffH.code.inFileAddr);
+            &(kernel->machine->mainMemory[noffH.code.virtualAddr]), 
+        	noffH.code.size, noffH.code.inFileAddr);
     }
+
     if (noffH.initData.size > 0) {
         DEBUG(dbgAddr, "Initializing data segment.");
-	DEBUG(dbgAddr, noffH.initData.virtualAddr << ", " << noffH.initData.size);
+        DEBUG(dbgAddr, noffH.initData.virtualAddr << ", " << noffH.initData.size);
         executable->ReadAt(
-		&(kernel->machine->mainMemory[noffH.initData.virtualAddr]),
-			noffH.initData.size, noffH.initData.inFileAddr);
+            &(kernel->machine->mainMemory[noffH.initData.virtualAddr]),
+        	noffH.initData.size, noffH.initData.inFileAddr);
     }
-
-#ifdef RDATA
+    #ifdef RDATA
     if (noffH.readonlyData.size > 0) {
         DEBUG(dbgAddr, "Initializing read only data segment.");
-	DEBUG(dbgAddr, noffH.readonlyData.virtualAddr << ", " << noffH.readonlyData.size);
+        DEBUG(dbgAddr, noffH.readonlyData.virtualAddr << ", " << noffH.readonlyData.size);
         executable->ReadAt(
-		&(kernel->machine->mainMemory[noffH.readonlyData.virtualAddr]),
-			noffH.readonlyData.size, noffH.readonlyData.inFileAddr);
+            &(kernel->machine->mainMemory[noffH.readonlyData.virtualAddr]),
+        	noffH.readonlyData.size, noffH.readonlyData.inFileAddr);
     }
-#endif
+    #endif
 
-    delete executable;			// close file
+    delete executable;		// close file
     return TRUE;			// success
 }
 
