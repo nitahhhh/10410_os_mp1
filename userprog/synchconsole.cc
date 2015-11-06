@@ -106,7 +106,6 @@ SynchConsoleOutput::PutChar(char ch)
     lock->Release();
 }
 
-
 //----------------------------------------------------------------------
 // SynchConsoleOutput::CallBack
 //      Interrupt handler called when it's safe to send the next 

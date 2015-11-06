@@ -36,21 +36,18 @@
 // simulated machine's format of little endian.  These end up
 // being NOPs when the host machine is also little endian (DEC and Intel).
 
-// WordToHost translate the word to the format of the horse (BIG_ENDIAN)
 unsigned int
 WordToHost(unsigned int word) {
-    #ifdef HOST_IS_BIG_ENDIAN
-    register unsigned long result;
-    result  = (word >> 24) & 0x000000ff;
-    result |= (word >> 8)  & 0x0000ff00;
-    result |= (word << 8)  & 0x00ff0000;
-    result |= (word << 24) & 0xff000000;
-    return result;
-
-    #else 
-	return word;
-
-    #endif
+#ifdef HOST_IS_BIG_ENDIAN
+	 register unsigned long result;
+	 result = (word >> 24) & 0x000000ff;
+	 result |= (word >> 8) & 0x0000ff00;
+	 result |= (word << 8) & 0x00ff0000;
+	 result |= (word << 24) & 0xff000000;
+	 return result;
+#else 
+	 return word;
+#endif /* HOST_IS_BIG_ENDIAN */
 }
 
 unsigned short

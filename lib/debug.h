@@ -63,7 +63,7 @@ extern Debug *debug;
 //----------------------------------------------------------------------
 #define ASSERT(condition)                                               \
     if (condition) {} else { 						\
-        cerr << "Assertion failed: line " << __LINE__ << " file " << __FILE__ << "\n";      \
+	cerr << "Assertion failed: line " << __LINE__ << " file " << __FILE__ << "\n";      \
         Abort();                                                              \
     }
 

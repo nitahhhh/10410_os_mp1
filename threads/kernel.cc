@@ -270,22 +270,24 @@ void Kernel::ExecAll()
 
 int Kernel::Exec(char* name)
 {
+ 
 	t[threadNum] = new Thread(name, threadNum);
 	t[threadNum]->space = new AddrSpace();
 	t[threadNum]->Fork((VoidFunctionPtr) &ForkExecute, (void *)t[threadNum]);
 	threadNum++;
-
 	return threadNum-1;
+///////////////////////////////////////////
 /*
-    cout << "Total threads number is " << execfileNum << endl;
+    cout << "Total threads number is " << execfileNum << endl; //
     for (int n=1;n<=execfileNum;n++) {
 		t[n] = new Thread(execfile[n]);
 		t[n]->space = new AddrSpace();
 		t[n]->Fork((VoidFunctionPtr) &ForkExecute, (void *)t[n]);
 		cout << "Thread " << execfile[n] << " is executing." << endl;
 	}
-	cout << "debug Kernel::Run finished.\n";	
-*/
+	cout << "debug Kernel::Run finished.\n";
+*/	
+//////////////////////////////////
 //  Thread *t1 = new Thread(execfile[1]);
 //  Thread *t1 = new Thread("../test/test1");
 //  Thread *t2 = new Thread("../test/test2");

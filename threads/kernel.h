@@ -67,6 +67,7 @@ class Kernel{
     PostOfficeInput *postOfficeIn;
     PostOfficeOutput *postOfficeOut;
 
+    /*static*/ bool usedPhyPage[NumPhysPages];
     int hostName;               // machine identifier
 
   private:
@@ -80,6 +81,7 @@ class Kernel{
     double reliability;         // likelihood messages are dropped
     char *consoleIn;            // file to read console input from
     char *consoleOut;           // file to send console output to
+    
 #ifndef FILESYS_STUB
     bool formatFlag;          // format the disk if this is true
 #endif
