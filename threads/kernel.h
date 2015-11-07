@@ -68,6 +68,7 @@ class Kernel{
     PostOfficeOutput *postOfficeOut;
 
     int hostName;               // machine identifier
+    bool usedPhyPage[NumPhysPages];
 
   private:
 

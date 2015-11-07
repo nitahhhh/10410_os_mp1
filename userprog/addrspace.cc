@@ -67,6 +67,7 @@ SwapHeader (NoffHeader *noffH)
 
 AddrSpace::AddrSpace()
 {
+/*
     pageTable = new TranslationEntry[NumPhysPages];
     for (int i = 0; i < NumPhysPages; i++) {
 	pageTable[i].virtualPage = i;	// for now, virt page # = phys page #
@@ -79,6 +80,7 @@ AddrSpace::AddrSpace()
     
     // zero out the entire address space
     bzero(kernel->machine->mainMemory, MemorySize);
+*/
 }
 
 //----------------------------------------------------------------------
@@ -133,6 +135,18 @@ AddrSpace::Load(char *fileName)
 						// to leave room for the stack
 #endif
     numPages = divRoundUp(size, PageSize);
+
+    pageTable = new TranslationEntry[numPages];
+    for(unsigned int i = 0, j = 0; i < numPages; i++) {
+        pageTable[i].virtualPage = i;
+        while(j < NumPhysPages && kernel->usedPhyPage[j] == true) j++;
+        kernel->usedPhyPage[j] = true;
+        pageTable[i].physicalPage = j;
+        pageTable[i].valid = true;
+        pageTable[i].use = false;
+        pageTable[i].dirty = false;
+        pageTable[i].readOnly = false;
+    }
     size = numPages * PageSize;
 
     ASSERT(numPages <= NumPhysPages);		// check we're not trying
@@ -148,15 +162,13 @@ AddrSpace::Load(char *fileName)
         DEBUG(dbgAddr, "Initializing code segment.");
 	DEBUG(dbgAddr, noffH.code.virtualAddr << ", " << noffH.code.size);
         executable->ReadAt(
-		&(kernel->machine->mainMemory[noffH.code.virtualAddr]), 
-			noffH.code.size, noffH.code.inFileAddr);
+		&(kernel->machine->mainMemory[pageTable[noffH.code.virtualAddr/PageSize].physicalPage * PageSize + (noffH.code.virtualAddr%PageSize)]), noffH.code.size, noffH.code.inFileAddr);
     }
     if (noffH.initData.size > 0) {
         DEBUG(dbgAddr, "Initializing data segment.");
 	DEBUG(dbgAddr, noffH.initData.virtualAddr << ", " << noffH.initData.size);
         executable->ReadAt(
-		&(kernel->machine->mainMemory[noffH.initData.virtualAddr]),
-			noffH.initData.size, noffH.initData.inFileAddr);
+&(kernel->machine->mainMemory[pageTable[noffH.initData.virtualAddr/PageSize].physicalPage * PageSize + (noffH.code.virtualAddr%PageSize)]),noffH.initData.size, noffH.initData.inFileAddr);
     }
 
 #ifdef RDATA
