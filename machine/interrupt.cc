@@ -242,11 +242,16 @@ Interrupt::Halt()
 
 void Interrupt::PrintInt(int number){
 	int pow10;
-        for( pow10=1; 10*pow10<=number; pow10*=10 );
-        for( ; number; number%=pow10, pow10/=10 ){
-		kernel->synchConsoleOut->PutChar((number/pow10)+'0');		
-		}
+
+    ChangeLevel(IntOn, IntOff); // Atomic instruction, disable interrupt
+
+    // Print out the text
+    for( pow10=1; 10*pow10<=number; pow10*=10 );
+    for( ; number; number%=pow10, pow10/=10 ){
+        kernel->synchConsoleOut->PutChar((number/pow10)+'0');		
+    }
 	kernel->synchConsoleOut->PutChar('\n');
+    ChangeLevel(IntOff, IntOn); // Re-enable the interrupt
 	return;
 }
 
